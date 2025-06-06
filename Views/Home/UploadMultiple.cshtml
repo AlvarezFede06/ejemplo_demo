@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Identificar Múltiples Actores";
+}
+
+<h1 class="mb-4">Identificar Múltiples Actores en una Imagen</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Subir Imagen con Múltiples Caras</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="IdentifyMultipleFaces" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="imageFile" class="form-label">Selecciona una imagen con múltiples actores</label>
+                <input class="form-control" type="file" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                <div class="form-text">La imagen debe contener caras claramente visibles para una mejor detección.</div>
+            </div>
+            <div class="mb-3 text-center">
+                <img id="preview" src="#" alt="Vista previa" style="max-height: 400px; display: none;" class="img-fluid rounded">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Identificar Actores</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Volver al Inicio</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            var preview = document.getElementById('preview');
+            preview.src = URL.createObjectURL(event.target.files[0]);
+            preview.style.display = 'block';
+        }
+    </script>
+}

@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Reconocimiento de Actores";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Reconocimiento de Actores</h1>
+    <p class="lead">Sube una imagen de un actor y nuestro modelo de IA te dirá de quién se trata.</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title">Identificar Múltiples Actores</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Sube una imagen con varios actores para identificarlos a todos</p>
+                <a asp-action="UploadMultiple" class="btn btn-success w-100">Subir Imagen Grupal</a>
+            </div>
+        </div>
+    </div>
+</div>

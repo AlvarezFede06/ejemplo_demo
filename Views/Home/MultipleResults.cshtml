@@ -1,0 +1,129 @@
+﻿@model MultipleActorsResult
+@{
+    ViewData["Title"] = "Actores Identificados";
+}
+
+<h1 class="mb-4">Actores Identificados en la Imagen</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title">Imagen Original con Actores Detectados</h5>
+    </div>
+    <div class="card-body text-center">
+        <div class="position-relative d-inline-block">
+            <img src="data:image/jpeg;base64,@Model.OriginalImageData" alt="Imagen original" class="img-fluid rounded" id="originalImage" />
+
+            @foreach (var actor in Model.DetectedActors)
+            {
+                <div class="position-absolute @(actor.IsRecognized ? "border-danger" : "border-warning") border-2 border"
+                     style="left: @(actor.FaceRectangle.X)px; top: @(actor.FaceRectangle.Y)px; width: @(actor.FaceRectangle.Width)px; height: @(actor.FaceRectangle.Height)px;">
+                    <div class="@(actor.IsRecognized ? "bg-danger" : "bg-warning") text-white p-1 small">
+                        @(actor.IsRecognized ? actor.ActorName : "No reconocido")
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<h2 class="mb-3">Caras Detectadas (@Model.DetectedActors.Count)</h2>
+
+<div class="row">
+    @foreach (var actor in Model.DetectedActors)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 @(!actor.IsRecognized ? "border-warning" : "")">
+                <div class="card-header @(!actor.IsRecognized ? "bg-warning bg-opacity-25" : "")">
+                    <h5 class="card-title">
+                        @if (actor.IsRecognized)
+                        {
+                            @actor.ActorName
+                        }
+                        else
+                        {
+                            <span>No hay coincidencia con actores del modelo</span>
+                        }
+                    </h5>
+                    <h6 class="card-subtitle text-muted">Confianza: @(Math.Round(actor.Confidence * 100, 2))%</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="data:image/jpeg;base64,@actor.ImageData" alt="@actor.ActorName" class="img-fluid rounded" style="max-height: 150px;" />
+                    </div>
+
+                    @if (actor.TopPredictions != null && actor.TopPredictions.Count > 0)
+                    {
+                        <h6 class="mt-3">Mejores coincidencias:</h6>
+                        <ul class="list-group">
+                            @foreach (var prediction in actor.TopPredictions.Take(3))
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @prediction.Key
+                                    <span class="badge @(prediction.Value >= 0.6f ? "bg-primary" : "bg-secondary") rounded-pill">
+                                        @(Math.Round(prediction.Value * 100, 2))%
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="mt-4 text-center">
+    <a asp-action="UploadMultiple" class="btn btn-primary">Identificar Otra Imagen</a>
+    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Volver al Inicio</a>
+</div>
+
+@section Scripts {
+    <script>
+        // Ajustar las posiciones de los recuadros de caras cuando la imagen se redimensiona
+        window.addEventListener('load', function() {
+            const originalImage = document.getElementById('originalImage');
+            const faceBoxes = document.querySelectorAll('.position-absolute');
+
+            // Obtener las dimensiones originales de la imagen
+            const originalWidth = originalImage.naturalWidth;
+            const originalHeight = originalImage.naturalHeight;
+
+            function adjustFaceBoxes() {
+                // Obtener las dimensiones actuales de la imagen
+                const currentWidth = originalImage.clientWidth;
+                const currentHeight = originalImage.clientHeight;
+
+                // Calcular la relación de escala
+                const scaleX = currentWidth / originalWidth;
+                const scaleY = currentHeight / originalHeight;
+
+                // Ajustar cada recuadro de cara
+                faceBoxes.forEach(box => {
+                    // Obtener las coordenadas originales del estilo inline
+                    const styleLeft = box.style.left;
+                    const styleTop = box.style.top;
+                    const styleWidth = box.style.width;
+                    const styleHeight = box.style.height;
+
+                    // Extraer los valores numéricos
+                    const originalLeft = parseInt(styleLeft);
+                    const originalTop = parseInt(styleTop);
+                    const originalBoxWidth = parseInt(styleWidth);
+                    const originalBoxHeight = parseInt(styleHeight);
+
+                    // Aplicar la escala
+                    box.style.left = (originalLeft * scaleX) + 'px';
+                    box.style.top = (originalTop * scaleY) + 'px';
+                    box.style.width = (originalBoxWidth * scaleX) + 'px';
+                    box.style.height = (originalBoxHeight * scaleY) + 'px';
+                });
+            }
+
+            // Ajustar los recuadros inicialmente
+            adjustFaceBoxes();
+
+            // Ajustar los recuadros cuando la ventana cambia de tamaño
+            window.addEventListener('resize', adjustFaceBoxes);
+        });
+    </script>
+}
